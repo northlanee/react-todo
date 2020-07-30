@@ -13,6 +13,8 @@ import "./App.css";
 const App = () => {
     const [maxId, setMaxId] = useState(100);
     const [todoData, setTodoData] = useState([]);
+    const [searchParam, setSearchParam] = useState("");
+    const [statusFilter, setStatusFilter] = useState("all");
 
     const createItem = (label) => {
         setMaxId(maxId + 1);
@@ -57,23 +59,48 @@ const App = () => {
     const countDone = () => todoData.filter((item) => item.done).length;
     const countToDo = () => todoData.filter((item) => !item.done).length;
 
+    const filterTodoData = () => {
+        if (searchParam) {
+            return todoData.filter((item) => {
+                return item.label.toLowerCase().indexOf(searchParam) >= 0;
+            });
+        }
+        if (statusFilter === "done") {
+            return todoData.filter((item) => {
+                return item.done;
+            });
+        }
+        if (statusFilter === "active") {
+            return todoData.filter((item) => {
+                return !item.done;
+            });
+        }
+        return todoData;
+    };
+
     return (
         <div className="todo-app">
             <AppHeader toDo={countToDo()} done={countDone()} />
             <div className="top-panel d-flex">
-                <SearchPanel />
-                <ItemStatusFilter />
+                <SearchPanel
+                    searchParam={searchParam}
+                    setSearchParam={setSearchParam}
+                />
+                <ItemStatusFilter
+                    statusFilter={statusFilter}
+                    setStatusFilter={setStatusFilter}
+                />
             </div>
 
-            {todoData.length ? (
+            {filterTodoData().length ? (
                 <TodoList
-                    todoData={todoData}
+                    todoData={filterTodoData()}
                     deleteTodo={deleteTodo}
                     toggleImportant={toggleImportant}
                     toggleDone={toggleDone}
                 />
             ) : (
-                <div>Please, add items to list!</div>
+                <div>No items to show</div>
             )}
 
             <AddItemForm addTodo={addTodo} />
